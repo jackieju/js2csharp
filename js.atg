@@ -1,5 +1,11 @@
 COMPILER C
 
+/* although cocoR's atg file can specify ignore case option, but it only affect the generated main(), in which 
+   create scanner with ignore case = 1
+        Scanner = new cScanner(S_src, 1);
+   So it dosen't affect the compiler itself.*/
+/*IGNORE CASE*/
+
 /* An attempt to describe a subset of C */
 
 CHARACTERS
@@ -174,10 +180,9 @@ Expression	=	AssignmentExpression { "," AssignmentExpression }
 ExpressionNoIn	=	AssignmentExpressionNoIn { "," AssignmentExpressionNoIn }
 .
 Statement	=	Block
-                |	JScriptVarStatement
+              /*  |	JScriptVarStatement*/
                 |	VariableStatement
                 |	EmptyStatement
-                |	LabelledStatement
                 |	ExpressionStatement
                 |	IfStatement
                 |	IterationStatement
@@ -189,6 +194,8 @@ Statement	=	Block
                 |	SwitchStatement
                 |	ThrowStatement
                 |	TryStatement
+                |	LabelledStatement
+                
 .
 Block	=	"{" [ StatementList ] "}"
 .
@@ -201,19 +208,19 @@ VariableDeclarationList	=	VariableDeclaration { "," VariableDeclaration }
 /*VariableDeclarationListNoIn	=	VariableDeclarationNoIn { "," VariableDeclarationNoIn }
 .*/
 
-VariableDeclaration	=	identifier [ Initialiser ]
+VariableDeclaration	=	identifier [":" identifier] [ Initialiser ]
 .
 VariableDeclarationNoIn	=	identifier [ InitialiserNoIn ]
 .
 
-JScriptVarStatement	=	"var" JScriptVarDeclarationList [ ";" ]
+/*JScriptVarStatement	=	"var" JScriptVarDeclarationList [ ";" ]
 .
 JScriptVarDeclarationList	=	JScriptVarDeclaration { "," JScriptVarDeclaration }
 .
 
 JScriptVarDeclaration	=	identifier ":" identifier [ Initialiser ]
-
-
+.
+*/
 Initialiser	=	"=" AssignmentExpression
 .
 InitialiserNoIn	=	"=" AssignmentExpressionNoIn
@@ -226,10 +233,18 @@ IfStatement	=	"if" "(" Expression ")" Statement [ "else" Statement ]
 .
 IterationStatement	=	( "do" Statement "while" "(" Expression ")" [ ";" ] )
                     |	( "while" "(" Expression ")" Statement )
-                    |	( "for" "(" [ ExpressionNoIn ] ";" [ Expression ] ";" [ Expression ] ")" Statement )
-                    |	( "for" "(" "var" VariableDeclarationList ";" [ Expression ] ";" [ Expression ] ")" Statement )
-                    |	( "for" "(" "var" VariableDeclarationNoIn "in" Expression ")" Statement )
-                    |	( "for" "(" LeftHandSideExpressionForIn "in" Expression ")" Statement )
+                    ForSt
+
+.
+
+ForSt =  "for" "("  (
+        (  [ ExpressionNoIn ] ";" [ Expression ] ";" [ Expression ] ")" Statement )
+                    |
+                    ( "var"	(  VariableDeclarationList ";" [ Expression ] ";" [ Expression ] ")" Statement )
+                        |	(  VariableDeclarationNoIn "in" Expression ")" Statement )
+                    )
+                    |	(  LeftHandSideExpressionForIn "in" Expression ")" Statement )
+                    )
 .
 ContinueStatement	=	"continue" [ identifier ] [ ";" ]
 .
@@ -279,7 +294,7 @@ ImportStatement	=	"import" Name [ "." "*" ] ";"
 Name	=	identifier { "." identifier }
 .
 
-.
+
 /*insertSemiColon	=	java code*/
 
 
