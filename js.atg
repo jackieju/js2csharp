@@ -35,7 +35,7 @@ PRAGMAS
 
 PRODUCTIONS
 
-JS                   = { SourceElements } EOF .
+C                   = { SourceElements } EOF .
 
 Boolean = "true" | "false" .
 
@@ -48,16 +48,16 @@ PrimaryExpression	=	"this"
         .
 Literal	=	( number | hexnumber | string | Boolean | "null" | regex1 ) .
         
-ArrayLiteral	=	"[" ( ( Elision )? "]" | ElementList Elision "]" | ( ElementList )? "]" )
+ArrayLiteral	=	"[" ( [ Elision ] "]" | ElementList Elision "]" | [ ElementList ] "]" )
 .
 
-ElementList	=	( Elision )? AssignmentExpression { Elision AssignmentExpression }
+ElementList	=	[ Elision ] AssignmentExpression { Elision AssignmentExpression }
 .
 
-Elision	=	( "," )+ 
+Elision	=	"," { "," }
 .
 
-ObjectLiteral	=	"{" ( PropertyNameAndValueList )? "}"
+ObjectLiteral	=	"{" [ PropertyNameAndValueList ] "}"
 .
 PropertyNameAndValueList	=	PropertyNameAndValue { "," PropertyNameAndValue | "," }
 .
@@ -67,27 +67,27 @@ PropertyName	=	identifier
                     |	string
                     |	number
 .
-MemberExpression	=	( ( FunctionExpression | PrimaryExpression ) ( MemberExpressionPart )* )
+MemberExpression	=	( ( FunctionExpression | PrimaryExpression ) { MemberExpressionPart } )
 |	AllocationExpression
 .
-MemberExpressionForIn	=	( ( FunctionExpression | PrimaryExpression ) ( MemberExpressionPart )* )
+MemberExpressionForIn	=	( ( FunctionExpression | PrimaryExpression ) { MemberExpressionPart } )
 .
-AllocationExpression	=	( "new" MemberExpression ( ( Arguments ( MemberExpressionPart )* )* ) )
+AllocationExpression	=	( "new" MemberExpression ( { Arguments { MemberExpressionPart } } ) )
 .
 MemberExpressionPart	=	( "[" Expression "]" )
 |	( "." identifier )
 .
-CallExpression	=	MemberExpression Arguments ( CallExpressionPart )*
+CallExpression	=	MemberExpression Arguments { CallExpressionPart }
 .
-CallExpressionForIn	=	MemberExpressionForIn Arguments ( CallExpressionPart )*
+CallExpressionForIn	=	MemberExpressionForIn Arguments { CallExpressionPart }
 .
 CallExpressionPart	=	Arguments
                     |	( "[" Expression "]" )
                     |	( "." identifier )
-                    
-Arguments	=	"(" ( ArgumentList )? ")"
+.                    
+Arguments	=	"(" [ ArgumentList ] ")"
 .
-ArgumentList	=	AssignmentExpression ( "," AssignmentExpression )*
+ArgumentList	=	AssignmentExpression { "," AssignmentExpression }
 .
 LeftHandSideExpression	=	CallExpression
                 |	MemberExpression
@@ -95,73 +95,73 @@ LeftHandSideExpression	=	CallExpression
 LeftHandSideExpressionForIn	=	CallExpressionForIn 
                 |	MemberExpressionForIn
 .
-PostfixExpression	=	LeftHandSideExpression ( PostfixOperator )?
+PostfixExpression	=	LeftHandSideExpression [ PostfixOperator ]
 .
 PostfixOperator	=	( "++" | "--" )
 .
-UnaryExpression	=	( PostfixExpression | ( UnaryOperator UnaryExpression )+ )
+UnaryExpression	=	( PostfixExpression | UnaryOperator UnaryExpression { UnaryOperator UnaryExpression } )
 .
 UnaryOperator	=	( "delete" | "void" | "typeof" | "++" | "--" | "+" | "-" | "~" | "!" )
 .
-MultiplicativeExpression	=	UnaryExpression ( MultiplicativeOperator UnaryExpression )*
+MultiplicativeExpression	=	UnaryExpression { MultiplicativeOperator UnaryExpression }
 .
 MultiplicativeOperator	=	( "*" | "/" | "%" )
 .
-AdditiveExpression	=	MultiplicativeExpression ( AdditiveOperator MultiplicativeExpression )*
+AdditiveExpression	=	MultiplicativeExpression { AdditiveOperator MultiplicativeExpression }
 .
 AdditiveOperator	=	( "+" | "-" )
 .
-ShiftExpression	=	AdditiveExpression ( ShiftOperator AdditiveExpression )*
+ShiftExpression	=	AdditiveExpression { ShiftOperator AdditiveExpression }
 .
 ShiftOperator	=	( "<<" | ">>" | ">>>" )
 .
-RelationalExpression	=	ShiftExpression ( RelationalOperator ShiftExpression )*
+RelationalExpression	=	ShiftExpression { RelationalOperator ShiftExpression }
 .
 RelationalOperator	=	( "<" | ">" | "<=" | ">=" | "instanceof" | "in" )
 .
-RelationalExpressionNoIn	=	ShiftExpression ( RelationalNoInOperator ShiftExpression )*
+RelationalExpressionNoIn	=	ShiftExpression { RelationalNoInOperator ShiftExpression }
 .
 RelationalNoInOperator	=	( "<" | ">" | "<=" | ">=" | "instanceof" )
 .
-EqualityExpression	=	RelationalExpression ( EqualityOperator RelationalExpression )*
+EqualityExpression	=	RelationalExpression { EqualityOperator RelationalExpression }
 .
-EqualityExpressionNoIn	=	RelationalExpressionNoIn ( EqualityOperator RelationalExpressionNoIn )*
+EqualityExpressionNoIn	=	RelationalExpressionNoIn { EqualityOperator RelationalExpressionNoIn }
 .
 EqualityOperator	=	( "==" | "!=" | "===" | "!==" )
 .
-BitwiseANDExpression	=	EqualityExpression ( BitwiseANDOperator EqualityExpression )*
+BitwiseANDExpression	=	EqualityExpression { BitwiseANDOperator EqualityExpression }
 .
-BitwiseANDExpressionNoIn	=	EqualityExpressionNoIn ( BitwiseANDOperator EqualityExpressionNoIn )*
+BitwiseANDExpressionNoIn	=	EqualityExpressionNoIn { BitwiseANDOperator EqualityExpressionNoIn }
 .
 BitwiseANDOperator	=	"&"
 .
-BitwiseXORExpression	=	BitwiseANDExpression ( BitwiseXOROperator BitwiseANDExpression )*
+BitwiseXORExpression	=	BitwiseANDExpression { BitwiseXOROperator BitwiseANDExpression }
 .
-BitwiseXORExpressionNoIn	=	BitwiseANDExpressionNoIn ( BitwiseXOROperator BitwiseANDExpressionNoIn )*
+BitwiseXORExpressionNoIn	=	BitwiseANDExpressionNoIn { BitwiseXOROperator BitwiseANDExpressionNoIn }
 .
 BitwiseXOROperator	=	"^"
 .
-BitwiseORExpression	=	BitwiseXORExpression ( BitwiseOROperator BitwiseXORExpression )*
+BitwiseORExpression	=	BitwiseXORExpression { BitwiseOROperator BitwiseXORExpression }
 .
-BitwiseORExpressionNoIn	=	BitwiseXORExpressionNoIn ( BitwiseOROperator BitwiseXORExpressionNoIn )*
+BitwiseORExpressionNoIn	=	BitwiseXORExpressionNoIn { BitwiseOROperator BitwiseXORExpressionNoIn }
 .
 BitwiseOROperator	=	"|"
 .
-LogicalANDExpression	=	BitwiseORExpression ( LogicalANDOperator BitwiseORExpression )*
+LogicalANDExpression	=	BitwiseORExpression { LogicalANDOperator BitwiseORExpression }
 .
-LogicalANDExpressionNoIn	=	BitwiseORExpressionNoIn ( LogicalANDOperator BitwiseORExpressionNoIn )*
+LogicalANDExpressionNoIn	=	BitwiseORExpressionNoIn { LogicalANDOperator BitwiseORExpressionNoIn }
 .
 LogicalANDOperator	=	"&&"
 .
-LogicalORExpression	=	LogicalANDExpression ( LogicalOROperator LogicalANDExpression )*
+LogicalORExpression	=	LogicalANDExpression { LogicalOROperator LogicalANDExpression }
 .
-LogicalORExpressionNoIn	=	LogicalANDExpressionNoIn ( LogicalOROperator LogicalANDExpressionNoIn )*
+LogicalORExpressionNoIn	=	LogicalANDExpressionNoIn { LogicalOROperator LogicalANDExpressionNoIn }
 .
 LogicalOROperator	=	"||"
 .
-ConditionalExpression	=	LogicalORExpression ( "?" AssignmentExpression ":" AssignmentExpression )?
+ConditionalExpression	=	LogicalORExpression [ "?" AssignmentExpression ":" AssignmentExpression ]
 .
-ConditionalExpressionNoIn	=	LogicalORExpressionNoIn ( "?" AssignmentExpression ":" AssignmentExpressionNoIn )?
+ConditionalExpressionNoIn	=	LogicalORExpressionNoIn [ "?" AssignmentExpression ":" AssignmentExpressionNoIn ]
 .
 AssignmentExpression	=	( LeftHandSideExpression AssignmentOperator AssignmentExpression | ConditionalExpression )
 .
@@ -169,9 +169,9 @@ AssignmentExpressionNoIn	=	( LeftHandSideExpression AssignmentOperator Assignmen
 .
 AssignmentOperator	=	( "=" | "*=" | "/=" | "%=" | "+=" | "-=" | "<<=" | ">>=" | ">>>=" | "&=" | "^=" | "|=" )
 .
-Expression	=	AssignmentExpression ( "," AssignmentExpression )*
+Expression	=	AssignmentExpression { "," AssignmentExpression }
 .
-ExpressionNoIn	=	AssignmentExpressionNoIn ( "," AssignmentExpressionNoIn )*
+ExpressionNoIn	=	AssignmentExpressionNoIn { "," AssignmentExpressionNoIn }
 .
 Statement	=	Block
                 |	JScriptVarStatement
@@ -190,94 +190,100 @@ Statement	=	Block
                 |	ThrowStatement
                 |	TryStatement
 .
-Block	=	"{" ( StatementList )? "}"
+Block	=	"{" [ StatementList ] "}"
 .
-StatementList	=	( Statement )+
+StatementList	= Statement	{ Statement }
 .
-VariableStatement	=	"var" VariableDeclarationList ( ";" )?
+VariableStatement	=	"var" VariableDeclarationList [ ";" ]
 .
-VariableDeclarationList	=	VariableDeclaration ( "," VariableDeclaration )*
+VariableDeclarationList	=	VariableDeclaration { "," VariableDeclaration }
 .
-VariableDeclarationListNoIn	=	VariableDeclarationNoIn ( "," VariableDeclarationNoIn )*
+/*VariableDeclarationListNoIn	=	VariableDeclarationNoIn { "," VariableDeclarationNoIn }
+.*/
+
+VariableDeclaration	=	identifier [ Initialiser ]
 .
-VariableDeclaration	=	identifier ( Initialiser )?
+VariableDeclarationNoIn	=	identifier [ InitialiserNoIn ]
 .
-VariableDeclarationNoIn	=	identifier ( InitialiserNoIn )?
+
+JScriptVarStatement	=	"var" JScriptVarDeclarationList [ ";" ]
 .
+JScriptVarDeclarationList	=	JScriptVarDeclaration { "," JScriptVarDeclaration }
+.
+
+JScriptVarDeclaration	=	identifier ":" identifier [ Initialiser ]
+
+
 Initialiser	=	"=" AssignmentExpression
 .
 InitialiserNoIn	=	"=" AssignmentExpressionNoIn
 .
 EmptyStatement	=	";"
 .
-ExpressionStatement	=	Expression ( ";" )?
+ExpressionStatement	=	Expression [ ";" ]
 .
-IfStatement	=	"if" "(" Expression ")" Statement ( "else" Statement )?
+IfStatement	=	"if" "(" Expression ")" Statement [ "else" Statement ]
 .
-IterationStatement	=	( "do" Statement "while" "(" Expression ")" ( ";" )? )
+IterationStatement	=	( "do" Statement "while" "(" Expression ")" [ ";" ] )
                     |	( "while" "(" Expression ")" Statement )
-                    |	( "for" "(" ( ExpressionNoIn )? ";" ( Expression )? ";" ( Expression )? ")" Statement )
-                    |	( "for" "(" "var" VariableDeclarationList ";" ( Expression )? ";" ( Expression )? ")" Statement )
+                    |	( "for" "(" [ ExpressionNoIn ] ";" [ Expression ] ";" [ Expression ] ")" Statement )
+                    |	( "for" "(" "var" VariableDeclarationList ";" [ Expression ] ";" [ Expression ] ")" Statement )
                     |	( "for" "(" "var" VariableDeclarationNoIn "in" Expression ")" Statement )
                     |	( "for" "(" LeftHandSideExpressionForIn "in" Expression ")" Statement )
 .
-ContinueStatement	=	"continue" ( identifier )? ( ";" )?
+ContinueStatement	=	"continue" [ identifier ] [ ";" ]
 .
-BreakStatement	=	"break" ( identifier )? ( ";" )?
+BreakStatement	=	"break" [ identifier ] [ ";" ]
 .
-ReturnStatement	=	"return" ( Expression )? ( ";" )?
+ReturnStatement	=	"return" [ Expression ] [ ";" ]
 .
 WithStatement	=	"with" "(" Expression ")" Statement
 .
 SwitchStatement	=	"switch" "(" Expression ")" CaseBlock
 .
-CaseBlock	=	"{" ( CaseClauses )? ( "}" | DefaultClause ( CaseClauses )? "}" )
+CaseBlock	=	"{" [ CaseClauses ] ( "}" | DefaultClause [ CaseClauses ] "}" )
 .
-CaseClauses	=	( CaseClause )+
+CaseClauses	=	CaseClause { CaseClause }
 .
-CaseClause	=	( ( "case" Expression ":" ) ) ( StatementList )?
+CaseClause	=	( ( "case" Expression ":" ) ) [ StatementList ]
 .
-DefaultClause	=	( ( "default" ":" ) ) ( StatementList )?
+DefaultClause	=	( ( "default" ":" ) ) [ StatementList ]
 .
 LabelledStatement	=	identifier ":" Statement
 .
-ThrowStatement	=	"throw" Expression ( ";" )?
+ThrowStatement	=	"throw" Expression [ ";" ]
 .
-TryStatement	=	"try" Block ( ( Finally | Catch ( Finally )? ) )
+TryStatement	=	"try" Block ( ( Finally | Catch [ Finally ] ) )
 .
 Catch	=	"catch" "(" identifier ")" Block
 .
 Finally	=	"finally" Block
 .
-FunctionDeclaration	=	"function" identifier ( "(" ( FormalParameterList )? ")" ) FunctionBody
+FunctionDeclaration	=	"function" identifier ( "(" [ FormalParameterList ] ")" ) FunctionBody
 .
-FunctionExpression	=	"function" ( identifier )? ( "(" ( FormalParameterList )? ")" ) FunctionBody
+FunctionExpression	=	"function" [ identifier ] ( "(" [ FormalParameterList ] ")" ) FunctionBody
 .
-FormalParameterList	=	identifier ( "," identifier )*
+FormalParameterList	=	identifier { "," identifier }
 .
-FunctionBody	=	"{" ( SourceElements )? "}"
+FunctionBody	=	"{" [ SourceElements ] "}"
 .
 
 
-SourceElements	=	( SourceElement )+
+SourceElements	=	SourceElement { SourceElement }
 .
 SourceElement	=	FunctionDeclaration
                 |	Statement
 .
-ImportStatement	=	"import" Name ( "." "*" )? ";"
+ImportStatement	=	"import" Name [ "." "*" ] ";"
 .
-Name	=	identifier ( "." identifier )*
+Name	=	identifier { "." identifier }
 .
-JScriptVarStatement	=	"var" JScriptVarDeclarationList ( ";" )?
-.
-JScriptVarDeclarationList	=	JScriptVarDeclaration ( "," JScriptVarDeclaration )*
-.
-JScriptVarDeclaration	=	identifier ":" <IDENTIFIER_NAME> ( Initialiser )?
+
 .
 /*insertSemiColon	=	java code*/
 
 
-END JS.
+END C.
 
 
 
